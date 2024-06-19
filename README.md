@@ -1,42 +1,81 @@
 # Stock Market API Service
 
-Expose an API endpoint where I can POST my data and sign up for an API key that will be used later.
+## Description
 
-Expose an API endpoint where I can hit and get stock market information, as a security mechanism use the API key obtained previously in order to validate user and make sure that no authorized user will consume the service (use request header for that purpose). 
+This service exposes endpoints for user registration, login, and obtaining stock market information.
 
-Here are some examples of stock symbols
-- Facebook (META)
-- Apple (AAPL)
-- Microsoft (MSFT)
-- Google (GOOGL)
-- Amazon (AMZN)
+## Endpoints
 
-The system will make use of a web service called Alpha Vantage, this will provide stock market information.
+### User Login
 
-Information that will be retrieved in the response of the service as json format will contain:
-- Open price
-- Higher price
-- Lower price
-- Variation between last 2 closing price values.
+- **URL:** `/api/signup/`
+- **Método:** `POST`
+- **Data :**
+    **Must:**
+        - `username`: Nombre de usuario
+        - `password`: Contraseña
+    **Optional:**
+        - `first_name`: Nombre
+        - `last_name`: Apellido
+        - `email`: Correo electrónico
 
-**Alpha Vantage API**
-```
-https://www.alphavantage.co/documentation/
-API Key: X86NOH6II01P7R24
-```
+### Get Stock Market Information
 
-API call sample to get stock prices from Facebook:
+- **URL:** `/api/stock/`
+- **Method:** `POST`
+- **Headers:**
+  - `API_KEY`: User's API key
+- **Request Body:**
+  - `symbol`: Stock market symbol
+  - `function`: Alpha Vantage API function (optional, default `TIME_SERIES_DAILY_ADJUSTED`)
+  - `interval`: Time interval (optional, default `daily`)
+  - `time_period`: Time period (optional)
+  - `series_type`: Series type (optional, default `close`)
 
-`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=META&outputsize=compact&apikey=X86NOH6II01P7R24`
+## Deployment on Heroku
 
-**Considerations:**
-- API URL structure is up to you.
-- Initial data for sign up: name, last name, email.
-- Validation rules for signup data are up to you.
-- Json structure is up to you.
-- It will be a big plus if you deploy the services somewhere in the cloud (heroku, gcloud, aws, azure, etc). It's ok if you just do it locally.
-- Use github (or other git repo).
-- Programming language: Python.
-- BONUS: If you can implement API throttling, that's a big one. Throttling rules are up to you (1 API call per second allowed or 10 API calls per minute, etc).
-- Log every API call received, log format is up to you.
-- Place a README.md file with instructions in the github repo so test can be performed and checked.
+1. Clone the repository.
+2. Create a `Procfile` with the following content:
+    ```plaintext
+    web: gunicorn stock_market_api.wsgi --log-file -
+    ```
+3. Create a `requirements.txt` with the project dependencies:
+    ```bash
+    pip freeze > requirements.txt
+    ```
+4. Add the Heroku configuration in `settings.py` as explained above.
+5. Log in to Heroku:
+    ```bash
+    heroku login
+    ```
+6. Create a new application on Heroku:
+    ```bash
+    heroku create your-app-name
+    ```
+7. Set up PostgreSQL on Heroku:
+    ```bash
+    heroku addons:create heroku-postgresql:hobby-dev
+    ```
+8. Configure environment variables on Heroku:
+    ```bash
+    heroku config:set DJANGO_SETTINGS_MODULE=stock_market_api.settings
+    heroku config:set ALPHA_APIKEY=your_alpha_vantage_api_key
+    ```
+9. Push the code to Heroku:
+    ```bash
+    git add .
+    git commit -m "Deploy to Heroku"
+    git push heroku master
+    ```
+10. Run migrations on Heroku:
+    ```bash
+    heroku run python manage.py migrate
+    ```
+11. Open the application on Heroku:
+    ```bash
+    heroku open
+    ```
+
+## Contact
+
+For more information, contact: <m.fragueiro.lazcano@gmail.com>
