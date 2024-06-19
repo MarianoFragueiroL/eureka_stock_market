@@ -55,7 +55,7 @@ This service exposes endpoints for user registration, login, and obtaining stock
 *Optional to implement datatype as csv*
 
 ## Deployment on 
-
+https://eurekastockmarket-production.up.railway.app/
 
 ## Contact
 
