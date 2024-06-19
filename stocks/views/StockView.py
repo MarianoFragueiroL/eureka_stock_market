@@ -20,9 +20,24 @@ class StockInfoView(generics.CreateAPIView):
         interval = serializer.validated_data.get('interval', None)
         time_period = serializer.validated_data.get('time_period', None)
         series_type = serializer.validated_data.get('series_type', None)
-
+        adjusted = serializer.validated_data.get('adjusted', True)
+        extended_hours = serializer.validated_data.get('extended_hours', True)
+        month = serializer.validated_data.get('month', None)
+        outputsize = serializer.validated_data.get('outputsize', 'compact')
+        datatype = serializer.validated_data.get('datatype', 'json')
+        
         try:
-            stock_instance = FunctionsVantageFactory.create(function, symbol, api_key, interval=interval, time_period=time_period, series_type=series_type)
+            stock_instance = FunctionsVantageFactory.create(
+                function,
+                symbol,
+                api_key,
+                interval=interval,
+                adjusted=adjusted,
+                extended_hours=extended_hours,
+                month=month,
+                outputsize=outputsize,
+                datatype=datatype
+            )
             data = stock_instance.get_data()
             data = self.calculate_variation(data)
             

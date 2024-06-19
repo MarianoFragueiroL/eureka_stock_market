@@ -3,11 +3,15 @@ import abc
 import requests
 import os
 
+from .FunctionValidator import FunctionValidator
+
 class FunctionsVantage(abc.ABC):
-    def __init__(self, symbol, api_key, *args, **kwargs):
+    VALIDATOR = FunctionValidator()
+    def __init__(self, symbol, api_key, datatype=None,*args, **kwargs):
         self.symbol = symbol
         self.api_key = api_key
         self.base_url = os.environ.get('STOCK_URL', 'https://www.alphavantage.co/')
+        self.datatype= self.VALIDATOR.validate_datatype(datatype)
 
     @abc.abstractmethod
     def get_function_name(self):
@@ -25,36 +29,50 @@ class FunctionsVantage(abc.ABC):
         response = requests.get(url)
         return response.json()
 
+class InvalidIntervalError(Exception):
+    pass
+class InvalidParameterError(Exception):
+    pass
 
 class TimeSeriesIntraday(FunctionsVantage):
-    VALID_INTERVALS = ['1min', '5min', '15min', '30min', '60min']
-
-    def __init__(self, symbol, interval, api_key, *args, **kwargs):
-        if interval not in self.VALID_INTERVALS:
-            raise InvalidIntervalError(f"Invalid interval: {interval}. Valid intervals are: {', '.join(self.VALID_INTERVALS)}")
-        super().__init__(symbol, api_key)
-        self.interval = interval
-
+    def __init__(self, symbol, api_key, interval, adjusted=True, extended_hours=True, month=None, outputsize='compact', datatype='json', *args, **kwargs):
+        super().__init__(symbol, api_key, datatype, *args, **kwargs)
+        self.interval = self.VALIDATOR.validate_interval(interval)
+        self.adjusted = adjusted
+        self.extended_hours = extended_hours
+        self.month = self.VALIDATOR.validate_month(month)
+        self.outputsize = self.VALIDATOR.validate_outputsize(outputsize)
+    
     def get_function_name(self):
         return 'TIME_SERIES_INTRADAY'
 
     def get_data(self):
-        return self.fetch_data(interval=self.interval)
+        params = {
+            'interval': self.interval,
+            'adjusted': 'true' if self.adjusted else 'false',
+            'extended_hours': 'true' if self.extended_hours else 'false',
+            'outputsize': self.outputsize,
+            'datatype': self.datatype
+        }
+        if self.month:
+            params['month'] = self.month
+        return self.fetch_data(**params)
 
 class TimeSeriesDaily(FunctionsVantage):
-    VALID_INTERVALS = ['1min', '5min', '15min', '30min', '60min']
-    def __init__(self, symbol, interval, api_key, *args, **kwargs):
-        if interval not in self.VALID_INTERVALS:
-            raise InvalidIntervalError(f"Invalid interval: {interval}. Valid intervals are: {', '.join(self.VALID_INTERVALS)}")
-        super().__init__(symbol, api_key)
-        self.interval = interval
+    def __init__(self, symbol, api_key, outputsize=None, datatype=None,*args, **kwargs):
+        super().__init__(symbol, api_key, datatype, *args, **kwargs)
+        self.outputsize = self.VALIDATOR.validate_outputsize(outputsize)
+
     def get_function_name(self):
         return 'TIME_SERIES_DAILY'
 
     def get_data(self):
-        return self.fetch_data(interval=self.interval)
+        return self.fetch_data()
 
 class TimeSeriesDailyAdjusted(FunctionsVantage):
+    def __init__(self, symbol, api_key, outputsize=None, datatype=None,*args, **kwargs):
+        super().__init__(symbol, api_key, datatype, *args, **kwargs)
+        self.outputsize = self.VALIDATOR.validate_outputsize(outputsize)
     def get_function_name(self):
         return 'TIME_SERIES_DAILY_ADJUSTED'
 
@@ -88,5 +106,3 @@ class TimeSeriesMonthlyAdjusted(FunctionsVantage):
 
     def get_data(self):
         return self.fetch_data()
-class InvalidIntervalError(Exception):
-    pass

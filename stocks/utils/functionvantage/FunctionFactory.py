@@ -1,4 +1,4 @@
-from .FunctionVantage import FunctionsVantage, TimeSeriesIntraday, TimeSeriesDaily, TimeSeriesDailyAdjusted, TimeSeriesWeekly,TimeSeriesWeeklyAdjusted, TimeSeriesMonthly, TimeSeriesMonthlyAdjusted
+from .FunctionVantage import TimeSeriesIntraday, FunctionsVantage, TimeSeriesDaily, TimeSeriesDailyAdjusted, TimeSeriesWeekly,TimeSeriesWeeklyAdjusted, TimeSeriesMonthly, TimeSeriesMonthlyAdjusted
 
 class FunctionsVantageFactory:
     _mapping = {
