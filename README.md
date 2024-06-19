@@ -67,6 +67,16 @@ install python
 *Optional to implement datatype as csv*
 
 
+
+**Deployment**
+    -The deployment was done on Railway because it is free, unlike Heroku, AWS, etc., which are paid services. The database used is Postgres from Elephant as it is also free. The downside is the connection time, which adds latency to the response.
+
+## Things to Improve:
+    -The API key for Alpha Vantage is stored in the .env file, which can be hashed and stored in the database.
+    -The project has the capability for extension, with each TIME type having its own instance. There is also a FunctionValidator to validate parameters and execute dynamically.
+    -The datatype as CSV is not implemented but is planned.
+    -The factory method and SOLID principles for Open/Closed were used.
+
 ## Contact
 
 For more information, contact: <m.fragueiro.lazcano@gmail.com>
