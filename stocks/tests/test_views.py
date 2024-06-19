@@ -49,3 +49,26 @@ def test_user_login_invalid_credentials():
     response = client.post("/api/login/", data, format='json')
     assert response.status_code == 400
 
+@pytest.mark.django_db
+def test_get_stock_info():
+    user = User.objects.create_user(username="testuser", password="password123")
+    api_key, key = APIKey.objects.create_key(name=user.username)
+
+    client = APIClient()
+    client.credentials(HTTP_API_KEY=key)
+
+    data = {
+        "symbol": "IBM",
+        "function": "TIME_SERIES_INTRADAY",
+        "interval": "5min",
+    }
+
+    with patch('stocks.utils.functionvantage.FunctionFactory.FunctionsVantageFactory.create') as mock_create:
+        mock_instance = mock_create.return_value
+        mock_instance.get_data.return_value = {"Meta Data": {}, "Time Series (Daily)": {}}
+
+        response = client.post("/api/stock/", data, format='json')
+
+        assert response.status_code == 200
+        assert 'Meta Data' in response.data
+        assert 'Time Series (Daily)' in response.data

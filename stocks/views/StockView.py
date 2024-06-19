@@ -1,7 +1,6 @@
 import requests
 import os
-from rest_framework import status,  generics
-from rest_framework.response import Response
+from rest_framework import status, generics
 from rest_framework.response import Response
 from ..serializers import StockRequestSerializer
 from ..utils.functionvantage.FunctionFactory import FunctionsVantageFactory
@@ -41,7 +40,7 @@ class StockInfoView(generics.CreateAPIView):
             )
             data = stock_instance.get_data()
             data = self.calculate_variation(data)
-            
+
             if 'Error Message' in data:
                 return Response({"error": data['Error Message']}, status=status.HTTP_400_BAD_REQUEST)
             if 'Note' in data:
@@ -53,14 +52,16 @@ class StockInfoView(generics.CreateAPIView):
 
     def handle_exception(self, exc):
         return Response({'error': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
 
     def calculate_variation(self, data):
         time_series_key = self._find_time_series_key(data)
         if time_series_key:
             time_series_data = data.get(time_series_key, {})
+        else:
+            return data
+
         if not time_series_data:
-            return data["Meta Data"]
+            return data
         dates = sorted(time_series_data.keys(), reverse=True)
         if len(dates) < 2:
             return data
@@ -71,11 +72,11 @@ class StockInfoView(generics.CreateAPIView):
 
         data["Meta Data"]['Variation'] = variation
         filtered_data = {
-                "Meta Data": data.get("Meta Data", {}),
-                f"Time Series {dates[0]}": [time_series_data[dates[i]] for i in range(self.limit) ]
-            }
+            "Meta Data": data.get("Meta Data", {}),
+            f"Time Series {dates[0]}": [time_series_data[dates[i]] for i in range(self.limit)]
+        }
         return filtered_data
-        
+
     def _find_time_series_key(self, data):
         for key in data.keys():
             if "Time Series" in key:
