@@ -4,6 +4,7 @@ from rest_framework import status,  generics
 from rest_framework.response import Response
 from rest_framework.response import Response
 from ..serializers import StockRequestSerializer
+from ..utils.functionvantage.FunctionFactory import FunctionsVantageFactory
 
 class StockInfoView(generics.CreateAPIView):
     serializer_class = StockRequestSerializer
@@ -53,14 +54,28 @@ class StockInfoView(generics.CreateAPIView):
     
 
     def calculate_variation(self, data):
-        time_series = data.get("Time Series (Daily)", {})
-        dates = sorted(time_series.keys(), reverse=True)
+        time_series_key = self._find_time_series_key(data)
+        if time_series_key:
+            time_series_data = data.get(time_series_key, {})
+        if not time_series_data:
+            return data["Meta Data"]
+        dates = sorted(time_series_data.keys(), reverse=True)
         if len(dates) < 2:
             return data
 
-        latest_close = float(time_series[dates[0]]["4. close"])
-        previous_close = float(time_series[dates[1]]["4. close"])
+        latest_close = float(time_series_data[dates[0]]["4. close"])
+        previous_close = float(time_series_data[dates[1]]["4. close"])
         variation = latest_close - previous_close
 
-        data['Variation'] = variation
-        return data
+        data["Meta Data"]['Variation'] = variation
+        filtered_data = {
+                "Meta Data": data.get("Meta Data", {}),
+                f"Time Series {dates[0]}": time_series_data[dates[0]]
+            }
+        return filtered_data
+        
+    def _find_time_series_key(self, data):
+        for key in data.keys():
+            if "Time Series" in key:
+                return key
+        return None
