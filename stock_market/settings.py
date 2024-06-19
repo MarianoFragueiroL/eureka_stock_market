@@ -55,6 +55,15 @@ MIDDLEWARE = [
     # 'stocks.middlewares.ApiKeyMiddleware',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '10/minute',  # limit a 10 calls per min
+    }
+}
+
 ROOT_URLCONF = 'stock_market.urls'
 
 TEMPLATES = [
