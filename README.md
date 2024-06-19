@@ -4,6 +4,18 @@
 
 This service exposes endpoints for user registration, login, and obtaining stock market information.
 
+## Deployment on 
+https://eurekastockmarket-production.up.railway.app/
+
+
+## EXCECUTION in local
+install python 
+
+**Run the following commands:**
+- pip install -r requirements.txt
+- python manage.py runserver
+
+
 ## Endpoints
 
 ### User Sign Up
@@ -54,8 +66,6 @@ This service exposes endpoints for user registration, login, and obtaining stock
 
 *Optional to implement datatype as csv*
 
-## Deployment on 
-https://eurekastockmarket-production.up.railway.app/
 
 ## Contact
 
