@@ -14,30 +14,16 @@ class SignUpView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        first_name = request.data.get('first_name')
-        last_name = request.data.get('last_name')
-        email = request.data.get('email')
-
-        if not all([username, password]):
-            return Response({"error": "All fields are required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            # User exists and credentials are correct, return the API key
-            api_key = ApiKey.objects.get(user=user)
-            return Response({"api_key": api_key.key}, status=status.HTTP_200_OK)
-        else:
-            # Check if the user already exists
+        try:
+            username = request.data.get('username')
             if User.objects.filter(username=username).exists():
-                return Response({"error": "User exists but credentials are incorrect"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Create the user and API key
+                return Response({"error": "User already exists"}, status=status.HTTP_400_BAD_REQUEST)
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            user = User.objects.get(username=username)
-            api_key = ApiKey.objects.get(user=user)
-            headers = self.get_success_headers(serializer.data)
-            return Response({"api_key": api_key.key}, status=status.HTTP_201_CREATED, headers=headers)
+            
+            user = serializer.save()
+            user_data = UserSerializer(user).data
+            api_key, created = ApiKey.objects.get_or_create(user=user)
+            return Response({"api_key": api_key.key, 'user_details': user_data}, status=status.HTTP_201_CREATED)
+        except:
+            return Response({"error": 'An error ocurred try later'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
