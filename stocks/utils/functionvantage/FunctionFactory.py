@@ -19,9 +19,7 @@ class FunctionsVantageFactory:
 
     @staticmethod
     def create(function_name, symbol, api_key, **kwargs):
-        print(function_name,kwargs)
         if function_name in FunctionsVantageFactory._mapping:
-            print(FunctionsVantageFactory._mapping[function_name](symbol=symbol, api_key=api_key, **kwargs))
             return FunctionsVantageFactory._mapping[function_name](symbol=symbol, api_key=api_key, **kwargs)
         else:
             raise ValueError(f"Unknown function name: {function_name}")

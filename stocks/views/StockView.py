@@ -18,6 +18,7 @@ class StockInfoView(generics.CreateAPIView):
         symbol = serializer.validated_data.get('symbol')
         function = serializer.validated_data.get('function', 'TIME_SERIES_DAILY_ADJUSTED')
         interval = serializer.validated_data.get('interval', None)
+        self.limit = serializer.validated_data.get('limit', 1)
         time_period = serializer.validated_data.get('time_period', None)
         series_type = serializer.validated_data.get('series_type', None)
         adjusted = serializer.validated_data.get('adjusted', True)
@@ -25,7 +26,7 @@ class StockInfoView(generics.CreateAPIView):
         month = serializer.validated_data.get('month', None)
         outputsize = serializer.validated_data.get('outputsize', 'compact')
         datatype = serializer.validated_data.get('datatype', 'json')
-        
+
         try:
             stock_instance = FunctionsVantageFactory.create(
                 function,
@@ -50,20 +51,6 @@ class StockInfoView(generics.CreateAPIView):
         except Exception as e:
             return self.handle_exception(e)
 
-    def fetch_stock_data(self, url):
-        response = requests.get(url)
-        return response.json()
-    def build_url(self, base_url, api_key, symbol, interval, time_period, series_type):
-        params = f'query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}'
-        if interval:
-            url += f'&interval={interval}'
-        if time_period:
-            url += f'&time_period={time_period}'
-        if series_type:
-            url += f'&series_type={series_type}'
-        url = f'{base_url}{params}'
-        return url
-
     def handle_exception(self, exc):
         return Response({'error': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
@@ -85,7 +72,7 @@ class StockInfoView(generics.CreateAPIView):
         data["Meta Data"]['Variation'] = variation
         filtered_data = {
                 "Meta Data": data.get("Meta Data", {}),
-                f"Time Series {dates[0]}": time_series_data[dates[0]]
+                f"Time Series {dates[0]}": [time_series_data[dates[i]] for i in range(self.limit) ]
             }
         return filtered_data
         

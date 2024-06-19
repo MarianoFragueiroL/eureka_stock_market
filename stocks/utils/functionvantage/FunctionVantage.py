@@ -21,7 +21,6 @@ class FunctionsVantage(abc.ABC):
         url = f"{self.base_url}query?function={self.get_function_name()}&symbol={self.symbol}&apikey={self.api_key}"
         for key, value in params.items():
             url += f"&{key}={value}"
-        print(url)
         return url
 
     def fetch_data(self, **params):
