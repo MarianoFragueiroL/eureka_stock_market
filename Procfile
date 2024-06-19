@@ -1,1 +1,1 @@
-web: python manage.py collectstatic && gunicorn stock_market.wsgi
+web:  gunicorn stock_market.wsgi
