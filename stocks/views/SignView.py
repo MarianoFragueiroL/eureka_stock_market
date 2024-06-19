@@ -2,9 +2,9 @@ from rest_framework import  status, generics
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from rest_framework_api_key.models import APIKey
 
 from ..serializers import UserSerializer
-from rest_framework_api_key.models import APIKey
 
 class SignUpView(generics.CreateAPIView):
     queryset = User.objects.all()
