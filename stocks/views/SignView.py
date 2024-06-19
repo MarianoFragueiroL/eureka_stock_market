@@ -3,6 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework_api_key.models import APIKey
+from rest_framework.views import exception_handler
 
 from ..serializers import UserSerializer
 
@@ -28,5 +29,4 @@ class SignUpView(generics.CreateAPIView):
             api_key, key = APIKey.objects.create_key(name=user.username)
             return Response({"api_key": key, 'user_details': user_data}, status=status.HTTP_201_CREATED)
         except Exception as error:
-            print(error)
-            return Response({"error": 'An error ocurred try later'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": f'An error ocurred try later. Check: {error}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
