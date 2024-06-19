@@ -6,18 +6,25 @@ This service exposes endpoints for user registration, login, and obtaining stock
 
 ## Endpoints
 
-### User Login
+### User Sign Up
 
 - **URL:** `/api/signup/`
 - **Método:** `POST`
 - **Data :**
     **Must:**
         - `username`: Nombre de usuario
-        - `password`: Contraseña
+        - `password`: password
     **Optional:**
-        - `first_name`: Nombre
-        - `last_name`: Apellido
-        - `email`: Correo electrónico
+        - `first_name`: Name
+        - `last_name`: Last Name
+        - `email`: email
+
+### User Login
+- **URL:** `/api/login/`
+- **Método:** `POST`
+- **Data :**
+    - `username`: Nombre de usuario
+    - `password`: password
 
 ### Get Stock Market Information
 
