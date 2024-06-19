@@ -56,7 +56,7 @@ class StockInfoView(generics.CreateAPIView):
         time_series = data.get("Time Series (Daily)", {})
         dates = sorted(time_series.keys(), reverse=True)
         if len(dates) < 2:
-            return Response({"error": "Not enough data points to calculate variation."}, status=status.HTTP_400_BAD_REQUEST)
+            return data
 
         latest_close = float(time_series[dates[0]]["4. close"])
         previous_close = float(time_series[dates[1]]["4. close"])
