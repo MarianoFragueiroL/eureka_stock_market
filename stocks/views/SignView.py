@@ -20,7 +20,7 @@ class SignUpView(generics.CreateAPIView):
         last_name = request.data.get('last_name')
         email = request.data.get('email')
 
-        if not all([username, password, first_name, last_name]):
+        if not all([username, password]):
             return Response({"error": "All fields are required"}, status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(username=username, password=password)
