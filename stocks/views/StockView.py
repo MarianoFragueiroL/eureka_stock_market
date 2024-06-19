@@ -21,19 +21,19 @@ class StockInfoView(generics.CreateAPIView):
         time_period = serializer.validated_data.get('time_period', None)
         series_type = serializer.validated_data.get('series_type', None)
 
-        params = f'query?function={function}&symbol={symbol}&apikey={api_key}'
-        url = f'{base_url}{params}'
+        try:
+            stock_instance = FunctionsVantageFactory.create(function, symbol, api_key, interval=interval, time_period=time_period, series_type=series_type)
+            data = stock_instance.get_data()
+            data = self.calculate_variation(data)
+            
+            if 'Error Message' in data:
+                return Response({"error": data['Error Message']}, status=status.HTTP_400_BAD_REQUEST)
+            if 'Note' in data:
+                return Response({"error": "API call limit reached. Please try again later."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
-        self.build_url(base_url, api_key, symbol, interval, time_period, series_type)
-        data = self.fetch_stock_data(url)
-        data = self.calculate_variation(data)
-
-        if 'Error Message' in data:
-            return Response({"error": data['Error Message']}, status=status.HTTP_400_BAD_REQUEST)
-        if 'Note' in data:
-            return Response({"error": "API call limit reached. Please try again later."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
-
-        return Response(data, status=status.HTTP_200_OK)
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return self.handle_exception(e)
 
     def fetch_stock_data(self, url):
         response = requests.get(url)
