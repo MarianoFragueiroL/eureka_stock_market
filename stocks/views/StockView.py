@@ -16,11 +16,14 @@ class StockInfoView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         symbol = serializer.validated_data.get('symbol')
         function = serializer.validated_data.get('function', 'TIME_SERIES_DAILY_ADJUSTED')
+        interval = serializer.validated_data.get('interval', None)
+        time_period = serializer.validated_data.get('time_period', None)
+        series_type = serializer.validated_data.get('series_type', None)
 
         params = f'query?function={function}&symbol={symbol}&apikey={api_key}'
         url = f'{base_url}{params}'
 
-        self.build_url(base_url, api_key, symbol)
+        self.build_url(base_url, api_key, symbol, interval, time_period, series_type)
         data = self.fetch_stock_data(url)
         data = self.calculate_variation(data)
 
@@ -34,8 +37,14 @@ class StockInfoView(generics.CreateAPIView):
     def fetch_stock_data(self, url):
         response = requests.get(url)
         return response.json()
-    def build_url(self, base_url, api_key, symbol):
+    def build_url(self, base_url, api_key, symbol, interval, time_period, series_type):
         params = f'query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}'
+        if interval:
+            url += f'&interval={interval}'
+        if time_period:
+            url += f'&time_period={time_period}'
+        if series_type:
+            url += f'&series_type={series_type}'
         url = f'{base_url}{params}'
         return url
 
